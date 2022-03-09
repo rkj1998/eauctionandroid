@@ -1,82 +1,255 @@
-import 'package:eauctionandroid/Screens/login_page.dart';
-import 'package:eauctionandroid/Screens/sign_up.dart';
-import 'package:eauctionandroid/const.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
 
-class StartPage extends StatelessWidget {
-  StartPage({Key? key}) : super(key: key);
+
+class StartPage extends StatefulWidget {
+  const StartPage({Key? key}) : super(key: key);
+
+  @override
+  _StartPageState createState() => _StartPageState();
+}
+
+class _StartPageState extends State<StartPage> {
+  TextEditingController pw = TextEditingController();
+  TextEditingController email = TextEditingController();
+  bool _obscureText = true;
+
+  void _toggle() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: DefaultTabController(length: 2, child: Container(
-        padding:  EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width * .01),
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.only(
-                left: MediaQuery.of(context).size.width * .03,
-                right: MediaQuery.of(context).size.width * .03,
-                top: MediaQuery.of(context).size.height * .02,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    margin: const EdgeInsets.only(top: 8, left: 0, right: 0),
-                    height: 40,
-                    child: TabBar(
-                      indicatorColor: primaryColor,
-                      unselectedLabelColor: Colors.black,
-                      labelColor: primaryColor,
-                      isScrollable: true,
-                      tabs: tabList.map((String value) {
-                        return Tab(
-                          text: value,
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
+    SimpleFontelicoProgressDialog _dialog = SimpleFontelicoProgressDialog(context: context, barrierDimisable:  false);
+    Size size = MediaQuery.of(context).size;
+    return MaterialApp(
+      color: Colors.purple,
+      title: "StartPage",
+      home: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text("Auction"),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      Colors.purple,
+                      Colors.purpleAccent,
+                    ])
             ),
-
-            const SizedBox(height: 20,),
-
-            Expanded(
-              child: SingleChildScrollView(
-                child: SizedBox(
-                    height: MediaQuery.of(context).size.height - (80 + 60 + 56),
-                    child: TabBarView(
-                      children: tabList.map((String value) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: getBody(value, context),
-                        );
-                      }).toList(),
-                    )),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),),
+        body: Container(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: const Text("LOGIN",style: TextStyle(
+                    fontSize: 35,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Quando",
+                    color: Colors.purple,
+                  ),),
+                ),
+                SizedBox(
+                  height: size.height * 0.02,
+                ),
+                Row(
+                    children: <Widget>[
+                      Expanded(child:
+                      TextField(
+                        controller: email,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(40.0),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(40.0)),
+                            borderSide: BorderSide(color:Colors.purple,),
+                          ),
+                          labelText: 'Email ID',
+                        ),
+
+                      )
+                      ),
+                    ]
+                ),
+                SizedBox(
+                  height: size.height * 0.05,
+                ),
+                Row(
+                    children: <Widget>[
+                      Expanded(child:
+                      TextField(
+                        obscureText: _obscureText,
+                        controller: pw,
+                        decoration: InputDecoration(
+                            focusedBorder: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(40.0)),
+                              borderSide: BorderSide(color:Color(0xff8c84c4),),
+                            ),
+                            border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(40.0),
+                              ),
+
+                            ),
+                            labelText: 'Password',
+                            suffixIcon: GestureDetector(
+                              onTap: () {
+                                _toggle();
+                              },
+                              child:
+                              Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+                            )
+                        ),
+                      )
+                      ),
+                    ]
+                ),
+                SizedBox(
+                  height: size.height * 0.05,
+                ),
+                LoginButton(
+                    text: "Login now",
+                    press: () async {
+                      if (email.text.isEmpty) {
+                        Fluttertoast.showToast(
+                            msg: "Enter Email ID",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );                      }
+                      if (pw.text.isEmpty) {
+                        Fluttertoast.showToast(
+                            msg: "Enter Email ID",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );                         }
+                      else {
+                        FirebaseAuth _auth = FirebaseAuth.instance;
+                        _dialog.show(message: '"PLease Wait');
+                        await _auth.signInWithEmailAndPassword(email: email.text, password: pw.text).then((user){
+                          if(user.user!.emailVerified) {
+                            _dialog.hide();
+                            /*
+                            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                                builder: (context) => HomeScreen()),(Route<dynamic> route) => false);
+
+                             */
+                          }
+                          else{
+                            _dialog.hide();
+                            Fluttertoast.showToast(
+                                msg: "Please Verify your mail by clicking link sent on mail.",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                                backgroundColor: Colors.purple,
+                                textColor: Colors.white,
+                                fontSize: 16.0
+                            );                             }
+                        }).catchError((e) {
+                          if (kDebugMode) {
+                            print(e);
+                          }
+                          _dialog.hide();
+                          Fluttertoast.showToast(
+                              msg: "Invalid email or password.",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              backgroundColor: Colors.purple,
+                              textColor: Colors.white,
+                              fontSize: 16.0
+                          );                           });
+                      }
+                    }
+                ),
+                TextButton(
+                    onPressed: () {
+                    },
+                    child: const Text(
+                      "Forgot Password?",
+                      style: TextStyle(color: Color(0xff8c84c4)),
+                    )),
+
+                Container(
+                  padding: const EdgeInsets.only(bottom: 50),
+                  child: TextButton(
+                      onPressed: () {
+                        /*
+                        Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => SignUpPage()));
+
+                         */
+                      },
+                      child: const Text(
+                        "Create An Account",
+                        style: TextStyle(color: Color(0xff8c84c4),
+                            fontSize: 20
+                        ),
+                      )),
+                ),
+
+              ],
+            ),
+          ),
+        ),
+      ),
     );
-  }
-  final List<String> tabList=["Login","Signup"];
-  getBody(String value,context){
-
-    if(value=="Login") {
-      return const LoginPage();
-    } else if(value=="Signup") {
-      return const Signup();
-    }
-
   }
 }
 
+class LoginButton extends StatelessWidget {
+  final String text;
+  final void Function()? press;
+  final textColor = Colors.white;
+
+  const LoginButton({
+    Key? key,
+    required this.text,
+    required this.press,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return SizedBox(
+      width: size.width * 0.9,
+      height: size.height*.08,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(29),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+          color: Colors.purple,
+          child: TextButton(
+            onPressed: press,
+            child: Text(
+              text,
+              style: TextStyle(color: textColor),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
