@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'Screens/start_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: StartPage(),
+      home: const StartPage(),
     );
   }
 }
