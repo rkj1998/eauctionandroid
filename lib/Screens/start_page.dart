@@ -1,8 +1,11 @@
+import 'package:eauctionandroid/Screens/sign_up.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
+
+import 'navigation_page.dart';
 
 
 class StartPage extends StatefulWidget {
@@ -151,11 +154,9 @@ class _StartPageState extends State<StartPage> {
                         await _auth.signInWithEmailAndPassword(email: email.text, password: pw.text).then((user){
                           if(user.user!.emailVerified) {
                             _dialog.hide();
-                            /*
-                            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-                                builder: (context) => HomeScreen()),(Route<dynamic> route) => false);
+                            Navigator.pushReplacement(context, MaterialPageRoute(
+                                builder: (context) => const NavigationWidget()));
 
-                             */
                           }
                           else{
                             _dialog.hide();
@@ -195,11 +196,11 @@ class _StartPageState extends State<StartPage> {
                   padding: const EdgeInsets.only(bottom: 50),
                   child: TextButton(
                       onPressed: () {
-                        /*
-                        Navigator.push(context, MaterialPageRoute(
-                            builder: (context) => SignUpPage()));
 
-                         */
+                        Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => const Signup()));
+
+
                       },
                       child: const Text(
                         "Create An Account",
