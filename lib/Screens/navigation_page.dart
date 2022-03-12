@@ -1,4 +1,5 @@
 import 'package:eauctionandroid/Screens/home_screen.dart';
+import 'package:eauctionandroid/Screens/profile_page.dart';
 import 'package:eauctionandroid/const.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -25,10 +26,7 @@ class _NavigationWidgetState extends State<NavigationWidget> {
       'Wallet',
       style: optionStyle,
     ),
-    Text(
-      'Profile',
-      style: optionStyle,
-    ),
+    ProfilePage()
   ];
   @override
   Widget build(BuildContext context) {
