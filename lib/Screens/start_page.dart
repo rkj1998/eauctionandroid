@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eauctionandroid/Screens/sign_up.dart';
+import 'package:eauctionandroid/const.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -151,8 +153,11 @@ class _StartPageState extends State<StartPage> {
                       else {
                         FirebaseAuth _auth = FirebaseAuth.instance;
                         _dialog.show(message: '"PLease Wait');
-                        await _auth.signInWithEmailAndPassword(email: email.text, password: pw.text).then((user){
-                          if(user.user!.emailVerified) {
+                        await _auth.signInWithEmailAndPassword(email: email.text, password: pw.text).then((user) async {
+                          if(user.user!.emailVerified)  {
+                            FirebaseFirestore fireStore = FirebaseFirestore.instance;
+                            var data = await fireStore.collection("User Info").doc(_auth.currentUser!.uid).get();
+                            ProfileData.assignData(data);
                             _dialog.hide();
                             Navigator.pushReplacement(context, MaterialPageRoute(
                                 builder: (context) => const NavigationWidget()));
