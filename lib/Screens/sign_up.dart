@@ -389,7 +389,8 @@ class _SignupState extends State<Signup> {
                               "DOB":formattedDate,
                               "Email":email.text,
                               "Mobile":mob.text,
-                              "ProfPic":"https://firebasestorage.googleapis.com/v0/b/hpc-enterprises.appspot.com/o/initial.png?alt=media&token=022c3fe6-cb2b-456f-8985-94b77c3a4c21"
+                              "ProfPic":"https://firebasestorage.googleapis.com/v0/b/hpc-enterprises.appspot.com/o/initial.png?alt=media&token=022c3fe6-cb2b-456f-8985-94b77c3a4c21",
+                              "Balance":0
                             });
                             Fluttertoast.showToast(
                                 msg: "A verification mail has been sent please verify to start using the application.",
