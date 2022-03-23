@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eauctionandroid/Screens/sign_up.dart';
 import 'package:eauctionandroid/const.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,21 +19,47 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
+
+
   TextEditingController pw = TextEditingController();
   TextEditingController email = TextEditingController();
   bool _obscureText = true;
-
+  bool isLoggedIn=false;
+  bool isLoading = true;
   void _toggle() {
     setState(() {
       _obscureText = !_obscureText;
     });
   }
 
+
+  void checkLoginStatus()  async{
+    await Firebase.initializeApp();
+    FirebaseAuth.instance
+        .authStateChanges()
+        .listen((User? user) async {
+      if (user != null) {
+        var data = await FirebaseFirestore.instance.collection("User Info").doc(
+            FirebaseAuth.instance.currentUser!.uid).get();
+        ProfileData.assignData(data);
+        isLoggedIn = true;
+      }
+    });
+
+  }
+
+  @override
+  void initState() {
+    checkLoginStatus();
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     SimpleFontelicoProgressDialog _dialog = SimpleFontelicoProgressDialog(context: context, barrierDimisable:  false);
     Size size = MediaQuery.of(context).size;
-    return MaterialApp(
+    return isLoggedIn?const NavigationWidget(): MaterialApp(
       color: Colors.purple,
       title: "StartPage",
       home: Scaffold(
