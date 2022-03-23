@@ -2,6 +2,8 @@ import 'package:eauctionandroid/Screens/payment_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../const.dart';
+
 
 class AddMoney extends StatelessWidget {
   final double currentAmt;
@@ -30,31 +32,36 @@ class AddMoney extends StatelessWidget {
                     amt = double.parse(value);
                   },
                   keyboardType: TextInputType.number,
-                  cursorColor: Colors.greenAccent[400],
-                  decoration: InputDecoration(
+                  cursorColor: primaryColor,
+                  decoration: const InputDecoration(
                     hintText: "₹ Amount",
                     fillColor: Colors.white,
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(
-                        color: (Colors.greenAccent[400])!,
+                        color: (primaryColor),
                       ),
                     ),
                   ),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height*.08,),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.greenAccent[400],
-                  ),
-                  width: MediaQuery.of(context).size.width*0.8,
-                  child:  ElevatedButton(
+                SizedBox(
+                  width: MediaQuery.of(context).size.width*75,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            primaryColor),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            )
+                        )
+                    ),
                     onPressed: () {
                       if (amt == 0) {
                         Fluttertoast.showToast(
                             msg: "Enter Amount greater than 0",
                             timeInSecForIosWeb: 4,
-                          backgroundColor: Colors.greenAccent[400]
+                          backgroundColor: primaryColor
                         );
                       }
                       else {

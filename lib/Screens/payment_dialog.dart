@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
 
+import '../const.dart';
 import 'add_money.dart';
 
 class PaymentDialog extends StatefulWidget {
@@ -27,7 +28,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
   void fetchData() async {
     var data = await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).get();
     setState(() {
-      walletBalance=data["Balance"];
+      walletBalance=data["Balance"].toDouble();
     });
   }
 
@@ -65,7 +66,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
             height: MediaQuery.of(context).size.height/5,
             child: Column(
               children: <Widget>[
-                Text("Exam Academy Wallet",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600,color: Colors.greenAccent[400]),),
+                const Text("Exam Academy Wallet",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600,color: primaryColor),),
                 const SizedBox(height: 15,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -84,7 +85,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                         },),
                         LoginButton(text: "Pay",press: () async {
                           SimpleFontelicoProgressDialog _dialog = SimpleFontelicoProgressDialog(context: context, barrierDimisable:  false);
-                          _dialog.show(message: "Please wait...",indicatorColor: Colors.greenAccent[400]);
+                          _dialog.show(message: "Please wait...",indicatorColor: primaryColor);
                           await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).
                               update({
                             "Balance":walletBalance-widget.amount

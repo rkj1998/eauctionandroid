@@ -6,6 +6,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
 
+import '../const.dart';
+
 class PaymentProvider extends StatefulWidget {
   final double currentAmount;
   final double amount;
@@ -26,6 +28,7 @@ class _PaymentProviderState extends State<PaymentProvider> {
       ),
       home: Scaffold(
         appBar: AppBar(
+          backgroundColor: primaryColor,
           title: const Text('Payment Page'),
         ),
         body: Center(
@@ -37,10 +40,10 @@ class _PaymentProviderState extends State<PaymentProvider> {
                   padding: const EdgeInsets.all(20),
                     child: Text(
                       "You are about to pay ₹"+widget.amount.toString() ,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 25,
                           fontFamily: "Quando",
-                          color: Colors.greenAccent[400]
+                          color: primaryColor
                       ),
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.clip,
@@ -57,14 +60,14 @@ class _PaymentProviderState extends State<PaymentProvider> {
                           child: Container(
                             width: 150.0,
                             height: 40.0,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               gradient:LinearGradient(
                                   colors: <Color>[
-                                    (Colors.greenAccent[400])!,
-                                    Colors.lightGreenAccent,
+                                    primaryColor,
+                                    secondaryColor,
                                   ]
                               ),
-                              borderRadius: const BorderRadius.all(
+                              borderRadius: BorderRadius.all(
                                 Radius.circular(40.0),
                               ) ,
                               color: Colors.blue,
@@ -112,13 +115,13 @@ class _PaymentProviderState extends State<PaymentProvider> {
   void openCheckout() async {
     var options = {
       'amount':widget.amount*100,
-      'key':'rzp_live_cGlZvDGFOLznzN',    // For Live purposes
-      //'key':'rzp_test_n4aUNieddyQ73m',    // For testing purposes
-      'name': 'ExamAcademy ',
+      //'key':'rzp_live_cGlZvDGFOLznzN',    // For Live purposes
+      'key':'rzp_test_T6SVk250w6bA0I',    // For testing purposes
+      'name': 'EAuction ',
       'description': 'Add Money To Wallet',
       'prefill': {'contact': '', 'email': ''},
       'theme':{
-        "color":"#22D37A",
+        "color":"#800080",
       },
     };
 

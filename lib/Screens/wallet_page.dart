@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../const.dart';
 import 'add_money.dart';
 
 class WalletPage extends StatefulWidget {
@@ -23,36 +24,8 @@ class _WalletPageState extends State<WalletPage> {
   void fetchWalletBalance()async {
     var data = await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).get();
     setState(() {
-      walletBalance=data["Balance"];
+      walletBalance=data["Balance"].toDouble();
     });
-  }
-
-  DateTime date = DateTime.now();
-  Future<void> _date(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: date,
-        firstDate: DateTime(2021, 1),
-        lastDate: DateTime(2050));
-    if (picked != null && picked != date) {
-      setState(() {
-        date = picked;
-      });
-    }
-  }
-
-  DateTime date2 = DateTime.now();
-  Future<void> _date2(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: date,
-        firstDate: DateTime(2021, 1),
-        lastDate: DateTime(2050));
-    if (picked != null && picked != date) {
-      setState(() {
-        date2 = picked;
-      });
-    }
   }
 
 
@@ -72,12 +45,8 @@ class _WalletPageState extends State<WalletPage> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Text("WALLET",style: TextStyle(
-              color: Colors.greenAccent[400],
+          title: const Text("WALLET",style: TextStyle(
+              color: primaryColor,
               fontSize: 20
           ),),
         ),
@@ -110,16 +79,16 @@ class _WalletPageState extends State<WalletPage> {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Icon(
+                  children: const [
+                    Icon(
                       Icons.account_balance_outlined,
                     ),
                     Text("Send Money To Bank",
                     style: TextStyle(
-                      color: Colors.greenAccent[400],
+                      color: primaryColor,
                       fontSize: 15
                     ),),
-                    const InkWell(
+                    InkWell(
                       child: Icon(
                         Icons.navigate_next
                       ),
@@ -140,16 +109,16 @@ class _WalletPageState extends State<WalletPage> {
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(
+                    children: const [
+                      Icon(
                         Icons.account_balance_wallet_outlined,
                       ),
                       Text("Add Money To Wallet",
                         style: TextStyle(
-                            color: Colors.greenAccent[400],
+                            color: primaryColor,
                             fontSize: 15
                         ),),
-                      const Icon(
+                      Icon(
                           Icons.navigate_next
                       )
                     ],
@@ -161,16 +130,16 @@ class _WalletPageState extends State<WalletPage> {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Icon(
+                  children: const [
+                    Icon(
                       Icons.account_balance,
                     ),
                     Text("Add/Edit Bank Account",
                       style: TextStyle(
-                          color: Colors.greenAccent[400],
+                          color: primaryColor,
                           fontSize: 15
                       ),),
-                    const InkWell(
+                    InkWell(
                       child: Icon(
                           Icons.navigate_next
                       ),
@@ -186,7 +155,7 @@ class _WalletPageState extends State<WalletPage> {
                   height: 7,
                 ),
                 Container(
-                  color: Colors.greenAccent[400],
+                  color: primaryColor,
                   height: 12,
                 ),
               ],

@@ -1,5 +1,6 @@
 import 'package:eauctionandroid/Screens/home_screen.dart';
 import 'package:eauctionandroid/Screens/profile_page.dart';
+import 'package:eauctionandroid/Screens/wallet_page.dart';
 import 'package:eauctionandroid/const.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -22,10 +23,7 @@ class _NavigationWidgetState extends State<NavigationWidget> {
       'Wishlist',
       style: optionStyle,
     ),
-    Text(
-      'Wallet',
-      style: optionStyle,
-    ),
+    WalletPage(),
     ProfilePage()
   ];
   @override
