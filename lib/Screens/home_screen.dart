@@ -1,11 +1,11 @@
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eauctionandroid/const.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget {
                   )
               ),
               onPressed: () {
-
+                createNewListing(context);
               },
               child: const Text(
                 "Create New Listing",
@@ -378,32 +378,106 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 5,),
                 GestureDetector(
                     onTap: () async{
-                      SimpleFontelicoProgressDialog _dialog = SimpleFontelicoProgressDialog(context: context, barrierDimisable:  false,duration: const Duration(seconds: 5));
-                      _dialog.show(message: "Please wait...",indicatorColor: primaryColor,);
-                      var reference = firebase_storage.FirebaseStorage.instance.ref().child(FirebaseAuth.instance.currentUser!.uid.toString()+itemCategory.text+itemPrice.text+itemName.text).
-                      child("image.jpg");
-                      final metadata = firebase_storage.SettableMetadata(
-                          contentType: 'image/jpeg',
-                          customMetadata: {'picked-file-path': courseImage!.path});
-                      var uploadTask = reference.putData(await courseImage!.readAsBytes(), metadata);
-                      /*
-                      final CollectionReference listings = FirebaseFirestore.instance.collection(
-                          'Listings');
-                      listings.doc(FirebaseAuth.instance.currentUser!.uid.toString()+itemCategory.text+itemPrice.text+itemName.text).set({
-                        "Item Name":itemName.text,
-                        "Item Category":itemCategory.text,
-                        "Item Price":int.parse(itemPrice.text),
-                        "About Item":aboutItem.text,
-
-                      });
-
-                       */
-
+                      if(itemName.text.isEmpty){
+                        Fluttertoast.showToast(
+                            msg: "Enter an Item Name",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                      }
+                      else if(itemCategory.text.isEmpty){
+                        Fluttertoast.showToast(
+                            msg: "Enter Item Category",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                      }
+                      else if(itemPrice.text.isEmpty){
+                        Fluttertoast.showToast(
+                            msg: "Enter Item Price",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                      }
+                      else if(courseImage==null){
+                        Fluttertoast.showToast(
+                            msg: "Add Item Image.",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                      }
+                      else {
+                        SimpleFontelicoProgressDialog _dialog = SimpleFontelicoProgressDialog(
+                            context: context,
+                            barrierDimisable: false,
+                            duration: const Duration(seconds: 5));
+                        _dialog.show(message: "Please wait...",
+                          indicatorColor: primaryColor,);
+                        var reference = firebase_storage.FirebaseStorage
+                            .instance.ref().
+                        child(FirebaseAuth.instance.currentUser!.uid
+                            .toString() + itemCategory.text + itemPrice.text +
+                            itemName.text + ".jpg");
+                        final metadata = firebase_storage.SettableMetadata(
+                            contentType: 'image/jpeg',
+                            customMetadata: {
+                              'picked-file-path': courseImage!.path
+                            });
+                        reference.putData(
+                            await courseImage!.readAsBytes(), metadata);
+                        await Future.delayed(const Duration(seconds: 2));
+                        var url = await reference.getDownloadURL();
+                        final CollectionReference listings = FirebaseFirestore
+                            .instance.collection(
+                            'Listings');
+                        listings.doc(FirebaseAuth.instance.currentUser!.uid
+                            .toString() + itemCategory.text + itemPrice.text +
+                            itemName.text).set({
+                          "Item Name": itemName.text,
+                          "Item Category": itemCategory.text,
+                          "Item Price": int.parse(itemPrice.text),
+                          "About Item": aboutItem.text,
+                          "url": url
+                        });
+                        List listingsList = ProfileData.userData["myListings"];
+                        listingsList.add(FirebaseAuth.instance.currentUser!.uid
+                            .toString() + itemCategory.text + itemPrice.text +
+                            itemName.text);
+                        FirebaseFirestore.instance.collection("User Info").doc(
+                            FirebaseAuth.instance.currentUser!.uid.toString()).
+                        update({"myListings": listingsList});
+                        var tempData = await FirebaseFirestore.instance
+                            .collection("User Info").doc(
+                            FirebaseAuth.instance.currentUser!.uid).get();
+                        ProfileData.assignData(tempData);
+                        _dialog.hide();
+                        Fluttertoast.showToast(
+                            msg: "Added Listing",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                        Navigator.of(context).pop();
+                      }
                     },
                     child: Container(
                       height: 50,
                       decoration: BoxDecoration(
-                        color:  Colors.black,
+                        color:  primaryColor,
                         borderRadius: BorderRadius.circular(20.0),
                         border:Border.all(width: .2,color: Colors.grey.withOpacity(.6)),
                         boxShadow: <BoxShadow>[
