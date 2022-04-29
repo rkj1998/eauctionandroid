@@ -1,3 +1,4 @@
+import 'package:eauctionandroid/Screens/Listings.dart';
 import 'package:eauctionandroid/Screens/home_screen.dart';
 import 'package:eauctionandroid/Screens/profile_page.dart';
 import 'package:eauctionandroid/Screens/wallet_page.dart';
@@ -19,10 +20,7 @@ class _NavigationWidgetState extends State<NavigationWidget> {
   TextStyle(fontSize: 30, fontWeight: FontWeight.w600);
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    Text(
-      'Wishlist',
-      style: optionStyle,
-    ),
+    Listings(),
     WalletPage(),
     ProfilePage()
   ];
@@ -69,7 +67,7 @@ class _NavigationWidgetState extends State<NavigationWidget> {
                 GButton(
                   icon: LineIcons.heart,
                   iconActiveColor: secondaryColor,
-                  text: 'Wishlist',
+                  text: 'Listings',
                   textColor: secondaryColor,
 
                 ),

@@ -42,6 +42,7 @@ class _StartPageState extends State<StartPage> {
         var data = await FirebaseFirestore.instance.collection("User Info").doc(
             FirebaseAuth.instance.currentUser!.uid).get();
         ProfileData.assignData(data);
+        listings = FirebaseFirestore.instance.collection("Listings");
         isLoggedIn = true;
       }
     });
@@ -179,12 +180,13 @@ class _StartPageState extends State<StartPage> {
                         );                         }
                       else {
                         FirebaseAuth _auth = FirebaseAuth.instance;
-                        _dialog.show(message: '"PLease Wait');
+                        _dialog.show(message: 'PLease Wait');
                         await _auth.signInWithEmailAndPassword(email: email.text, password: pw.text).then((user) async {
                           if(user.user!.emailVerified)  {
                             FirebaseFirestore fireStore = FirebaseFirestore.instance;
                             var data = await fireStore.collection("User Info").doc(_auth.currentUser!.uid).get();
                             ProfileData.assignData(data);
+                            listings = await FirebaseFirestore.instance.collection("Listings").get();
                             _dialog.hide();
                             Navigator.pushReplacement(context, MaterialPageRoute(
                                 builder: (context) => const NavigationWidget()));
