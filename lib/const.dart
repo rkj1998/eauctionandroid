@@ -11,3 +11,5 @@ class ProfileData{
     userData=data;
   }
 }
+
+var listings;
