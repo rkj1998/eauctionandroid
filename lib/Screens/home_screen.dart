@@ -449,7 +449,8 @@ class HomeScreen extends StatelessWidget {
                           "Item Category": itemCategory.text,
                           "Item Price": int.parse(itemPrice.text),
                           "About Item": aboutItem.text,
-                          "url": url
+                          "url": url,
+                          "isActive":false,
                         });
                         List listingsList = ProfileData.userData["myListings"];
                         listingsList.add(FirebaseAuth.instance.currentUser!.uid

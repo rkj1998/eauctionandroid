@@ -1,3 +1,4 @@
+import 'package:eauctionandroid/Screens/my_listing.dart';
 import 'package:eauctionandroid/const.dart';
 import 'package:flutter/material.dart';
 
@@ -17,9 +18,11 @@ class _ListingsState extends State<Listings> {
   }
   List myListings = [];
   bool isLoaded = true;
+  Map dict = {};
   fetchData() async{
     for(int i=0;i<ProfileData.userData['myListings'].length;i++){
       var data = await listings.doc(ProfileData.userData['myListings'][i]).get();
+      dict[data['Item Name']]=ProfileData.userData['myListings'][i];
       myListings.add(data);
     }
     setState(() {
@@ -51,6 +54,9 @@ class _ListingsState extends State<Listings> {
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
+                  onTap: (){
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => MyListing(listing: myListings[index],listingName: dict[myListings[index]['Item Name']],)));
+                  },
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width/2 - 10,
                     child: Card(
