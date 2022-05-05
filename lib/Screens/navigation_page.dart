@@ -18,11 +18,11 @@ class _NavigationWidgetState extends State<NavigationWidget> {
   int _selectedIndex = 0;
   static const TextStyle optionStyle =
   TextStyle(fontSize: 30, fontWeight: FontWeight.w600);
-  static const List<Widget> _widgetOptions = <Widget>[
+  static  final List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    Listings(),
-    WalletPage(),
-    ProfilePage()
+    const Listings(),
+    const WalletPage(),
+    const ProfilePage()
   ];
   @override
   Widget build(BuildContext context) {

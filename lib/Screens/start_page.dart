@@ -43,7 +43,9 @@ class _StartPageState extends State<StartPage> {
             FirebaseAuth.instance.currentUser!.uid).get();
         ProfileData.assignData(data);
         listings = FirebaseFirestore.instance.collection("Listings");
-        isLoggedIn = true;
+        setState(() {
+          isLoggedIn = true;
+        });
       }
     });
 
