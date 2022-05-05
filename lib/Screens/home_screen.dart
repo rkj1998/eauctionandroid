@@ -11,8 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
+  HomeScreen({Key? key}) : super(key: key);
+  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance.collection('Listings').snapshots();
   @override
   Widget build(BuildContext context) {
     TextEditingController search = TextEditingController();
@@ -112,9 +112,64 @@ class HomeScreen extends StatelessWidget {
                 ),
                 ),
               ),
-              LineIcon.fire(color: Colors.red,)
+              LineIcon.fire(color: Colors.red,),
             ],
-          )
+          ),
+          const SizedBox(height: 10,),
+          StreamBuilder(
+            stream: _usersStream,
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              return snapshot.connectionState==ConnectionState.waiting?const Center(child: CircularProgressIndicator(),):
+              SizedBox(
+                height: MediaQuery.of(context).size.height/2.5,
+                child: GridView.builder(gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                ),
+                  itemCount: snapshot.data.docs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return snapshot.data.docs[index].data()['isActive']?GestureDetector(
+                      onTap: (){
+                      },
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width/2 - 10,
+                        child: Card(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              SizedBox(
+                                  height:MediaQuery.of(context).size.height/5 - 90 ,
+                                  width: MediaQuery.of(context).size.width/2 - 10,
+                                  child: Image.network(snapshot.data.docs[index].data()['url'],fit: BoxFit.fill,)
+                              ),
+                              Center(
+                                child: Text(
+                                  snapshot.data.docs[index].data()['Item Name'],
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  '₹'+snapshot.data.docs[index].data()['Item Price'].toString(),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ):const SizedBox();
+                  },),
+              );
+          },)
         ],
       ),
     );
