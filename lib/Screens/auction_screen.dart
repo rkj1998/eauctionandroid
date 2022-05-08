@@ -1,24 +1,68 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
-
 import '../const.dart';
 
-class MyListing extends StatefulWidget {
+class AuctionScreen extends StatefulWidget {
   var listing;
   String listingName;
-  MyListing({Key? key,required this.listing,required this.listingName}) : super(key: key);
+  AuctionScreen({Key? key,required this.listing,required this.listingName}) : super(key: key);
 
   @override
-  _MyListingState createState() => _MyListingState();
+  _AuctionScreenState createState() => _AuctionScreenState();
 }
 
-class _MyListingState extends State<MyListing> {
+class _AuctionScreenState extends State<AuctionScreen> {
+  Timer? countdownTimer;
+  late Duration myDuration;
+
+  void initDuration(){
+    myDuration = widget.listing['endTime'].toDate().difference(widget.listing['startTime'].toDate());
+  }
+  @override
+  void initState() {
+    super.initState();
+    initDuration();
+    startTimer();
+  }
+  void startTimer() {
+    countdownTimer =
+        Timer.periodic(const Duration(seconds: 1), (_) => setCountDown());
+  }
+  void stopTimer() {
+    setState(() => countdownTimer!.cancel());
+  }
+
+  void setCountDown() {
+    const reduceSecondsBy = 1;
+    setState(() {
+      final seconds = myDuration.inSeconds - reduceSecondsBy;
+      if (seconds < 0) {
+        countdownTimer!.cancel();
+      } else {
+        myDuration = Duration(seconds: seconds);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    stopTimer();
+  }
   @override
   Widget build(BuildContext context) {
+    String strDigits(int n) => n.toString().padLeft(2, '0');
+    final days = strDigits(myDuration.inDays);
+    final hours = strDigits(myDuration.inHours.remainder(24));
+    final minutes = strDigits(myDuration.inMinutes.remainder(60));
+    final seconds = strDigits(myDuration.inSeconds.remainder(60));
     return Scaffold(
         body: SingleChildScrollView(
           child: Container(
@@ -50,106 +94,7 @@ class _MyListingState extends State<MyListing> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width*.75,
-                  child:ElevatedButton(
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            Colors.red),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            )
-                        )
-                    ),
-                    onPressed: () async {
-                      if(widget.listing['isActive']==true){
-                        Fluttertoast.showToast(
-                            msg: "Cannot Delete an active listing.",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            backgroundColor: Colors.purple,
-                            textColor: Colors.white,
-                            fontSize: 16.0
-                        );
-                      }
-                      else{
-                        SimpleFontelicoProgressDialog _dialog = SimpleFontelicoProgressDialog(context: context, barrierDimisable:  false);
-                        _dialog.show(message: "Deleting");
-                        List data = ProfileData.userData['myListings'];
-                        data.remove(widget.listingName);
-                        await FirebaseFirestore.instance.collection("User Info").doc(
-                            FirebaseAuth.instance.currentUser!.uid).update({"myListings":data});
-                        await FirebaseFirestore.instance.collection("Listings").doc(
-                            widget.listingName).delete();
-                        var data2 = await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).get();
-                        ProfileData.assignData(data2);
-                        listings = await FirebaseFirestore.instance.collection("Listings").get();
-                        _dialog.hide();
-                        Fluttertoast.showToast(
-                            msg: "Deleted",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            backgroundColor: Colors.purple,
-                            textColor: Colors.white,
-                            fontSize: 16.0
-                        );
-                        Navigator.of(context).pop();
-                      }
-
-                    },
-                    child: const Text(
-                      "Delete Listing",
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
-                    ),
-
-                  ) ,
-                ),
-
-                SizedBox(
-                  width: MediaQuery.of(context).size.width*.75,
-                  child:ElevatedButton(
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            primaryColor),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            )
-                        )
-                    ),
-                    onPressed: () async {
-                      if(widget.listing['isActive']==true){
-                        Fluttertoast.showToast(
-                            msg: "Cannot start an active listing.",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            backgroundColor: Colors.purple,
-                            textColor: Colors.white,
-                            fontSize: 16.0
-                        );
-                      }
-                      else{
-                        startAuction(context);
-                      }
-                    },
-                    child: const Text(
-                      "Start Auction",
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
-                    ),
-
-                  ) ,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
+               const SizedBox(height: 20,),
                 const Text('Item Name',style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w500,
@@ -197,7 +142,7 @@ class _MyListingState extends State<MyListing> {
 
                     Column(
                       children: <Widget>[
-                        const Text("Item Price",style: TextStyle(
+                        const Text("Current Bid",style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w500,
                             fontSize: 18
@@ -213,25 +158,95 @@ class _MyListingState extends State<MyListing> {
                 const SizedBox(
                   height: 20,
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+
+                    Column(
+                      children: <Widget>[
+                        const Text("Current Highest Bidder:",style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18
+                        ),),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(widget.listing["highestBidder"][0],style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize:14
+                        ),),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+
+                    Column(
+                      children: <Widget>[
+                        const Text("Time Remaining:",style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18
+                        ),),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text("$days Days:$hours Hrs:$minutes Mins:$seconds Secs",style: const TextStyle(
+                            color: Colors.green,
+                            fontSize:20
+                        ),),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20,),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width*.75,
+                  child:ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            primaryColor),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            )
+                        )
+                    ),
+                    onPressed: () async {
+                      placeBid(context);
+                    },
+                    child: const Text(
+                      "Place Bid",
+                      style: TextStyle(
+                          color: Colors.white
+                      ),
+                    ),
+
+                  ) ,
+                ),
+
 
               ],
             ),
           ),
         ));
   }
-  void startAuction(context){
 
-    TextEditingController itemPrice = TextEditingController();
-    itemPrice.text=widget.listing['Item Price'].toString();
-    TextEditingController duration = TextEditingController();
-
+  void placeBid(context){
+    TextEditingController bid = TextEditingController();
     showModalBottomSheet(
         context: context,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         builder: (BuildContext context){
           return Container(
-            height: MediaQuery.of(context).size.height/1.35,
+            height: MediaQuery.of(context).size.height/3,
             decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius:  BorderRadius.only(
@@ -248,7 +263,7 @@ class _MyListingState extends State<MyListing> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
 
-                    const Text("Start Auction",style: TextStyle(
+                    const Text("Place Bid",style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w900,
                         fontSize: 19
@@ -275,11 +290,12 @@ class _MyListingState extends State<MyListing> {
 
                   ],
                 ),
+
                 Container(
                   height: 50,
                   decoration: BoxDecoration(
                     color:  Colors.white,
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius:  BorderRadius.circular(20.0),
                     border:Border.all(width: .2,color: Colors.grey.withOpacity(.6)),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
@@ -289,82 +305,37 @@ class _MyListingState extends State<MyListing> {
                       ),
                     ],
                   ),
-                  margin: const EdgeInsets.only(top:8  ),
+                  margin: const EdgeInsets.only(top:20  ),
                   padding: const EdgeInsets.symmetric(horizontal:25,vertical: 5 ),
                   alignment: Alignment.center,
                   child:Center(
-                      child:TextField(
-
+                      child:TextFormField(
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly
                         ],
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-
                         style: TextStyle(color: Colors.grey,
                             fontSize:MediaQuery.of(context).size.width*.038
                         ),
                         cursorColor: Colors.greenAccent[400],
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          hintText: "Item Price",
+                          hintText: "Bid Amount",
                           hintStyle: TextStyle(
                               fontSize:13,
                               fontWeight: FontWeight.w100
                           ),
                         ),
-                        controller: itemPrice,
+                        controller: bid,
                       )
                   ),
                 ),
-                const SizedBox(height: 5,),
-                Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color:  Colors.white,
-                    borderRadius: BorderRadius.circular(20.0),
-                    border:Border.all(width: .2,color: Colors.grey.withOpacity(.6)),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(1),
-                        blurRadius: 15.0,
-                        spreadRadius: -5.5,
-                      ),
-                    ],
-                  ),
-                  margin: const EdgeInsets.only(top:8  ),
-                  padding: const EdgeInsets.symmetric(horizontal:25,vertical: 5 ),
-                  alignment: Alignment.center,
-                  child:Center(
-                      child:TextField(
 
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-
-                        style: TextStyle(color: Colors.grey,
-                            fontSize:MediaQuery.of(context).size.width*.038
-                        ),
-                        cursorColor: Colors.greenAccent[400],
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Enter Duration in Hours",
-                          hintStyle: TextStyle(
-                              fontSize:13,
-                              fontWeight: FontWeight.w100
-                          ),
-                        ),
-                        controller: duration,
-                      )
-                  ),
-                ),
                 const SizedBox(height: 5,),
                 GestureDetector(
-                    onTap: () async {
-
-                      if(itemPrice.text.isEmpty){
+                    onTap: () async{
+                      if(bid.text.isEmpty){
                         Fluttertoast.showToast(
-                            msg: "Enter Item Price",
+                            msg: "Enter Bid Amount",
                             toastLength: Toast.LENGTH_SHORT,
                             gravity: ToastGravity.BOTTOM,
                             backgroundColor: Colors.purple,
@@ -372,11 +343,9 @@ class _MyListingState extends State<MyListing> {
                             fontSize: 16.0
                         );
                       }
-
-
-                      if(duration.text.isEmpty){
+                      else if(int.parse(bid.text)<=widget.listing['Item Price']){
                         Fluttertoast.showToast(
-                            msg: "Enter Duration",
+                            msg: "Bid Amount Needs to be higher than current bid.",
                             toastLength: Toast.LENGTH_SHORT,
                             gravity: ToastGravity.BOTTOM,
                             backgroundColor: Colors.purple,
@@ -384,7 +353,16 @@ class _MyListingState extends State<MyListing> {
                             fontSize: 16.0
                         );
                       }
-
+                      else if(int.parse(bid.text)>ProfileData.userData['Balance']){
+                        Fluttertoast.showToast(
+                            msg: "Not Enough money in the wallet.",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.purple,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                      }
                       else {
                         SimpleFontelicoProgressDialog _dialog = SimpleFontelicoProgressDialog(
                             context: context,
@@ -392,16 +370,39 @@ class _MyListingState extends State<MyListing> {
                             duration: const Duration(seconds: 5));
                         _dialog.show(message: "Please wait...",
                           indicatorColor: primaryColor,);
-                        await FirebaseFirestore.instance.collection("Listings").doc(
-                            widget.listingName).update({
-                          "isActive":true,
-                          "duration":int.parse(duration.text),
-                          "Item Price":int.parse(itemPrice.text),
-                          "startTime":DateTime.now(),
-                          "endTime":DateTime.now().add(Duration(hours: int.parse(duration.text))),
-                          "highestBidder":["NA","NA"]
-                        });
+                        if(widget.listing['highestBidder'][0]=="NA"){
+                         await FirebaseFirestore.instance.collection("Listings").doc(widget.listingName).update({
+                            "Item Price":int.parse(bid.text),
+                            "highestBidder":[ProfileData.userData['FirstName']+" "+ProfileData.userData['LastName'],FirebaseAuth.instance.currentUser!.uid]
+                          });
+                          await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).update({
+                            "Balance": ProfileData.userData['Balance']-int.parse(bid.text),
+                          });
+                          var data = await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).get();
+                          setState(() {
+                            ProfileData.assignData(data);
+                          });
+                        }
+                        else{
+                          var data = await FirebaseFirestore.instance.collection("Listings").doc(widget.listingName).get();
+                          await FirebaseFirestore.instance.collection("User Info").doc(data['highestBidder'][1]).update({
+                            "Balance": data['Balance']+data["Item Price"],
+                          });
+                          await FirebaseFirestore.instance.collection("Listings").doc(widget.listingName).update({
+                            "fees":int.parse(bid.text),
+                            "highestBidder":[ProfileData.userData['FirstName']+" "+ProfileData.userData['LastName'],FirebaseAuth.instance.currentUser!.uid]
+                          });
+                          await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).update({
+                            "Balance": ProfileData.userData['Balance']-bid,
+                          });
+                           data = await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).get();
+                          setState(() {
+                            ProfileData.assignData(data);
+                          });
+                        }
+
                         _dialog.hide();
+                        Navigator.of(context).pop();
 
                       }
                     },
@@ -422,14 +423,13 @@ class _MyListingState extends State<MyListing> {
                       margin: const EdgeInsets.only(top:10,bottom: 18  ),
                       padding: const EdgeInsets.symmetric(horizontal:25,vertical: 5 ),
                       alignment: Alignment.center,
-                      child:  const Text("Save",
+                      child:  const Text("Bid Now",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                         ),),
-
                     )),
               ],
             ),
@@ -437,6 +437,7 @@ class _MyListingState extends State<MyListing> {
         }
     );
   }
+
 
 }
 
