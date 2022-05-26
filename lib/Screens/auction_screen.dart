@@ -310,6 +310,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
                   alignment: Alignment.center,
                   child:Center(
                       child:TextFormField(
+                        keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly
                         ],
@@ -368,8 +369,8 @@ class _AuctionScreenState extends State<AuctionScreen> {
                             context: context,
                             barrierDimisable: false,
                             duration: const Duration(seconds: 5));
-                        _dialog.show(message: "Please wait...",
-                          indicatorColor: primaryColor,);
+                      //  _dialog.show(message: "Please wait...",
+                        //  indicatorColor: primaryColor,);
                         if(widget.listing['highestBidder'][0]=="NA"){
                          await FirebaseFirestore.instance.collection("Listings").doc(widget.listingName).update({
                             "Item Price":int.parse(bid.text),
@@ -384,26 +385,24 @@ class _AuctionScreenState extends State<AuctionScreen> {
                           });
                         }
                         else{
-                          var data = await FirebaseFirestore.instance.collection("Listings").doc(widget.listingName).get();
-                          await FirebaseFirestore.instance.collection("User Info").doc(data['highestBidder'][1]).update({
-                            "Balance": data['Balance']+data["Item Price"],
+
+                          await FirebaseFirestore.instance.collection("User Info").doc(widget.listing['highestBidder'][1]).update({
+                            "Balance": ProfileData.userData['Balance']+widget.listing["Item Price"],
                           });
                           await FirebaseFirestore.instance.collection("Listings").doc(widget.listingName).update({
-                            "fees":int.parse(bid.text),
+                            "Item Price":int.parse(bid.text),
                             "highestBidder":[ProfileData.userData['FirstName']+" "+ProfileData.userData['LastName'],FirebaseAuth.instance.currentUser!.uid]
                           });
                           await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).update({
-                            "Balance": ProfileData.userData['Balance']-bid,
+                            "Balance": ProfileData.userData['Balance']-int.parse(bid.text),
                           });
-                           data = await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).get();
+                           var data = await FirebaseFirestore.instance.collection("User Info").doc(FirebaseAuth.instance.currentUser!.uid).get();
                           setState(() {
                             ProfileData.assignData(data);
                           });
                         }
-
                         _dialog.hide();
                         Navigator.of(context).pop();
-
                       }
                     },
                     child: Container(

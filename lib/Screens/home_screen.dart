@@ -140,7 +140,7 @@ class HomeScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               SizedBox(
-                                  height:MediaQuery.of(context).size.height/5 - 90 ,
+                                  height:MediaQuery.of(context).size.height/5 - 100 ,
                                   width: MediaQuery.of(context).size.width/2 - 10,
                                   child: Image.network(snapshot.data.docs[index].data()['url'],fit: BoxFit.fill,)
                               ),
@@ -496,6 +496,7 @@ class HomeScreen extends StatelessWidget {
                             await courseImage!.readAsBytes(), metadata);
                         await Future.delayed(const Duration(seconds: 2));
                         var url = await reference.getDownloadURL();
+                        print(url);
                         final CollectionReference listings = FirebaseFirestore
                             .instance.collection(
                             'Listings');
